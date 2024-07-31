@@ -1,6 +1,7 @@
 export 'package:photo_browser/define.dart';
 export 'package:photo_browser/pull_down_pop.dart';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,10 +14,10 @@ typedef DisplayTypeBuilder = DisplayType Function(int index);
 typedef ImageProviderBuilder = ImageProvider Function(int index);
 typedef CustomChildBuilder = CustomChild Function(int index);
 typedef PositionBuilder = Positioned Function(
-  BuildContext context,
-  int curIndex,
-  int totalNum,
-);
+    BuildContext context,
+    int curIndex,
+    int totalNum,
+    );
 typedef PositionsBuilder = List<Positioned> Function(BuildContext context);
 
 const String _notifyCurrentIndexChanged = 'currentIndexChanged';
@@ -31,19 +32,19 @@ enum DisplayType {
 class PhotoBrowser extends StatefulWidget {
   /// 弹出图片浏览器
   Future<dynamic> push(
-    BuildContext context, {
-    bool rootNavigator = true,
-    bool fullscreenDialog = true,
-    Duration? transitionDuration,
-    Widget? page,
-  }) async {
+      BuildContext context, {
+        bool rootNavigator = true,
+        bool fullscreenDialog = true,
+        Duration? transitionDuration,
+        Widget? page,
+      }) async {
     if (routeType == RouteType.normal) {
       return await Navigator.of(context, rootNavigator: rootNavigator)
           .push(CupertinoPageRoute(
-              fullscreenDialog: fullscreenDialog,
-              builder: (BuildContext context) {
-                return page ?? this;
-              }));
+          fullscreenDialog: fullscreenDialog,
+          builder: (BuildContext context) {
+            return page ?? this;
+          }));
     }
     return await _fadePush(
       context,
@@ -55,12 +56,12 @@ class PhotoBrowser extends StatefulWidget {
   }
 
   Future<dynamic> _fadePush(
-    BuildContext context, {
-    bool rootNavigator = true,
-    bool fullscreenDialog = true,
-    Duration? transitionDuration,
-    Widget? page,
-  }) async {
+      BuildContext context, {
+        bool rootNavigator = true,
+        bool fullscreenDialog = true,
+        Duration? transitionDuration,
+        Widget? page,
+      }) async {
     return await Navigator.of(context, rootNavigator: rootNavigator).push(
       PageRouteBuilder(
         opaque: false,
@@ -71,14 +72,14 @@ class PhotoBrowser extends StatefulWidget {
         },
         //动画时间
         transitionDuration:
-            transitionDuration ?? const Duration(milliseconds: 400),
+        transitionDuration ?? const Duration(milliseconds: 400),
         //过渡动画构建
         transitionsBuilder: (
-          BuildContext context,
-          Animation<double> animation,
-          Animation secondaryAnimation,
-          Widget child,
-        ) {
+            BuildContext context,
+            Animation<double> animation,
+            Animation secondaryAnimation,
+            Widget child,
+            ) {
           //渐变过渡动画
           return FadeTransition(
             // 透明度从 0.0-1.0
@@ -224,11 +225,11 @@ class PhotoBrowser extends StatefulWidget {
     this.scrollDirection = Axis.horizontal,
     this.onPageChanged,
   })  : allowSwipeDownToPop =
-            (allowPullDownToPop == true) ? false : allowSwipeDownToPop,
+  (allowPullDownToPop == true) ? false : allowSwipeDownToPop,
         showPageTurnBtn = showPageTurnBtn ??
             (Platform.isIOS || Platform.isAndroid ? false : true),
         assert(imageProviderBuilder != null || imageUrlBuilder != null,
-            'imageProviderBuilder,imageUrlBuilder can not all null'),
+        'imageProviderBuilder,imageUrlBuilder can not all null'),
         super(key: key);
 }
 
@@ -311,9 +312,9 @@ class _PhotoBrowserState extends State<PhotoBrowser> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (
-      BuildContext context,
-      BoxConstraints constraints,
-    ) {
+        BuildContext context,
+        BoxConstraints constraints,
+        ) {
       _constraints = constraints;
       return _buildContent();
     });
@@ -321,7 +322,7 @@ class _PhotoBrowserState extends State<PhotoBrowser> {
 
   Widget _buildContent() {
     List<Widget> children = <Widget>[
-      _buildBackColor(),
+      Positioned.fill(child: _buildBackColor()),
       _buildPageView(),
       _buildPageCode(),
       if (widget.showPageTurnBtn) _buildLeftArrow(),
@@ -346,9 +347,14 @@ class _PhotoBrowserState extends State<PhotoBrowser> {
     return PhotoBrowserProvider(
       controller: _browserController,
       notificationNames: const <String>[_notifyPullDownScaleChanged],
-      builder: (BuildContext context) => Container(
-          color:
-              (widget.backcolor ?? Colors.black).withOpacity(_pullDownScale)),
+      builder: (BuildContext context) => Opacity(opacity: _pullDownScale, child: ClipRRect(child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: Colors.black.withOpacity(0.4),
+        ),
+      ),),),
     );
   }
 
@@ -385,9 +391,9 @@ class _PhotoBrowserState extends State<PhotoBrowser> {
     return GestureDetector(
       onTap: allowTapToPop ? _onTap : null,
       onVerticalDragDown:
-          !widget.allowSwipeDownToPop ? null : _onVerticalDragDown,
+      !widget.allowSwipeDownToPop ? null : _onVerticalDragDown,
       onVerticalDragUpdate:
-          !widget.allowSwipeDownToPop ? null : _onVerticalDragUpdate,
+      !widget.allowSwipeDownToPop ? null : _onVerticalDragUpdate,
       child: Container(
         color: Colors.transparent,
         child: child,
@@ -513,10 +519,10 @@ class _PhotoBrowserState extends State<PhotoBrowser> {
           child: curIndex <= 0
               ? Container(width: 36, height: 36, color: Colors.transparent)
               : Icon(
-                  Icons.keyboard_arrow_left,
-                  color: Colors.white.withAlpha(230),
-                  size: 36,
-                ),
+            Icons.keyboard_arrow_left,
+            color: Colors.white.withAlpha(230),
+            size: 36,
+          ),
         ),
       );
     }
@@ -548,10 +554,10 @@ class _PhotoBrowserState extends State<PhotoBrowser> {
           child: curIndex >= widget.itemCount - 1
               ? Container(width: 36, height: 36, color: Colors.transparent)
               : Icon(
-                  Icons.keyboard_arrow_right,
-                  color: Colors.white.withAlpha(230),
-                  size: 36,
-                ),
+            Icons.keyboard_arrow_right,
+            color: Colors.white.withAlpha(230),
+            size: 36,
+          ),
         ),
       );
     }
@@ -583,7 +589,7 @@ class _PhotoBrowserState extends State<PhotoBrowser> {
     // 滚动状态不允许pop处理
     if (!widget.canPopWhenScrolling &&
         (((_pageController.position.pixels * 1000).toInt() %
-                (_constraints!.maxWidth * 1000).toInt()) !=
+            (_constraints!.maxWidth * 1000).toInt()) !=
             0)) return;
     _willPop = true;
     setState(() {});
@@ -615,7 +621,7 @@ class PhotoBrowserController with ChangeNotifier {
 
   static PhotoBrowserController? of(BuildContext context) {
     final PhotoBrowserProvider? provider =
-        context.dependOnInheritedWidgetOfExactType<PhotoBrowserProvider>();
+    context.dependOnInheritedWidgetOfExactType<PhotoBrowserProvider>();
     return provider?.controller;
   }
 
@@ -645,11 +651,11 @@ class PhotoBrowserProvider extends InheritedWidget {
     required WidgetBuilder builder,
     List<String>? notificationNames,
   }) : super(
-            key: key,
-            child: _NotificationListener(
-              builder: builder,
-              notificationNames: notificationNames,
-            ));
+      key: key,
+      child: _NotificationListener(
+        builder: builder,
+        notificationNames: notificationNames,
+      ));
 
   @override
   bool updateShouldNotify(covariant PhotoBrowserProvider oldWidget) {
