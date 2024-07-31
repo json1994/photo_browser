@@ -177,6 +177,7 @@ class PhotoBrowser extends StatefulWidget {
 
   /// 显示左右翻页箭头按钮
   final bool showPageTurnBtn;
+  final bool showCode;
 
   final bool reverse;
   final Color? imageColor;
@@ -195,6 +196,7 @@ class PhotoBrowser extends StatefulWidget {
     this.controller,
     this.routeType = RouteType.fade,
     this.allowShrinkPhoto = true,
+    this.showCode = true,
     this.heroTagBuilder,
     this.displayTypeBuilder,
     this.imageProviderBuilder,
@@ -324,7 +326,8 @@ class _PhotoBrowserState extends State<PhotoBrowser> {
     List<Widget> children = <Widget>[
       Positioned.fill(child: _buildBackColor()),
       _buildPageView(),
-      _buildPageCode(),
+      if (widget.showCode)
+        _buildPageCode(),
       if (widget.showPageTurnBtn) _buildLeftArrow(),
       if (widget.showPageTurnBtn) _buildRightArrow(),
     ];
